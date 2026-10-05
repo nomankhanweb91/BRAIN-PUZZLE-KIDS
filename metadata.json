@@ -1,0 +1,6 @@
+{
+  "name": "BRAIN PUZZLE KIDS",
+  "description": "A delightful wooden jigsaw puzzle game for kids featuring cute animals, fruits, vehicles, nature, dinosaurs, responsive landscape gameplay, and offline rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
