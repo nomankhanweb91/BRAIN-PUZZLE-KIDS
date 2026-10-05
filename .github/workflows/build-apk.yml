@@ -1,30 +1,28 @@
 name: Build Brain Puzzle Kids APK
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  build-apk:
-    name: Build Android APK
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
-     - name: Install Node dependencies
-  run: npm install
+      - name: Install dependencies
+        run: npm install
 
-      - name: Build React/Vite app
+      - name: Build web app
         run: npm run build
 
       - name: Setup Java
@@ -32,24 +30,34 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Sync Capacitor Android project
+      - name: Check Android project
+        run: |
+          echo "Android project:"
+          ls -la android
+          echo "Gradle wrapper:"
+          ls -la android/gradlew || true
+
+      - name: Sync Capacitor
         run: npx cap sync android
 
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
-      - name: Build Debug APK
+      - name: Build APK
         working-directory: android
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Find APK
+        run: |
+          find android/app/build/outputs -type f -name "*.apk" -print
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: brain-puzzle-kids-apk
+          name: Brain-Puzzle-Kids-APK
           path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
