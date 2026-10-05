@@ -1,28 +1,64 @@
+name: Build Brain Puzzle Kids APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
 jobs:
   build:
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Install Node
-        # Node setup
+      - name: Check Node.js
+        shell: powershell
+        run: node --version
+
+      - name: Check npm
+        shell: powershell
+        run: npm --version
 
       - name: Install dependencies
+        shell: powershell
         run: npm install
 
       - name: Build web app
+        shell: powershell
         run: npm run build
 
-      - name: Capacitor sync
+      - name: Check Capacitor
+        shell: powershell
+        run: npx cap --version
+
+      - name: Sync Capacitor Android
+        shell: powershell
         run: npx cap sync android
 
-      - name: Build APK
+      - name: Check Android project
+        shell: powershell
+        run: |
+          Write-Host "Android folder:"
+          Get-ChildItem android
+          Write-Host "Gradle wrapper:"
+          Get-ChildItem android\gradlew*
+
+      - name: Build Debug APK
+        shell: powershell
         working-directory: android
-        run: .\gradlew.bat assembleDebug
+        run: .\gradlew.bat assembleDebug --no-daemon
+
+      - name: Find APK
+        shell: powershell
+        run: |
+          Get-ChildItem -Path android\app\build\outputs -Recurse -Filter *.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Brain-Puzzle-Kids-APK
           path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
