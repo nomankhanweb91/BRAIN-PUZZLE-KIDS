@@ -1,37 +1,55 @@
-name: Build Android APK
+name: Build Brain Puzzle Kids APK
 
 on:
   push:
     branches:
       - main
-      - master
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build APK
+  build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build React/Vite app
+        run: npm run build
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
           cache: gradle
 
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Sync Capacitor Android project
+        run: npx cap sync android
+
       - name: Make Gradle executable
-        run: chmod +x ./gradlew
+        run: chmod +x android/gradlew
 
       - name: Build Debug APK
+        working-directory: android
         run: ./gradlew assembleDebug --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-game-apk
-          path: app/build/outputs/apk/debug/*.apk
+          name: brain-puzzle-kids-apk
+          path: android/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
