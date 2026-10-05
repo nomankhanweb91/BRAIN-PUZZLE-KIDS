@@ -21,8 +21,8 @@ jobs:
           node-version: 20
           cache: npm
 
-      - name: Install Node dependencies
-        run: npm ci
+     - name: Install Node dependencies
+  run: npm install
 
       - name: Build React/Vite app
         run: npm run build
